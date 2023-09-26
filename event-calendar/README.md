@@ -3,7 +3,7 @@
 
 ## How To Setup
 ```
-git clone https://github.com/sajib1066/event-calendar.git
+git clone https://github.com/joaoricardoroma/calendar-planner.git
 ```
 ```
 cd event-calendar
