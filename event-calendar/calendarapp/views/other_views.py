@@ -1,5 +1,5 @@
 # cal/views.py
-
+from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from django.views import generic
@@ -9,7 +9,7 @@ import calendar
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
-
+from requests import request
 
 from calendarapp.models import EventMember, Event
 from calendarapp.utils import Calendar
@@ -109,13 +109,20 @@ class EventMemberDeleteView(generic.DeleteView):
     success_url = reverse_lazy("calendarapp:calendar")
 
 
+def event_delete(request, pk):
+    delete_it = Event.objects.get(id=pk)
+    delete_it.delete()
+    messages.success(request, "Record Deleted Successfully...")
+    return redirect(reverse("calendarapp:calendar"))
+
+
 class CalendarViewNew(LoginRequiredMixin, generic.View):
     login_url = "accounts:signin"
     template_name = "calendarapp/calendar.html"
     form_class = EventForm
 
     def get(self, request, *args, **kwargs):
-        forms = self.form_class()
+        form = self.form_class()
         events = Event.objects.get_all_events(user=request.user)
         events_month = Event.objects.get_running_events(user=request.user)
         event_list = []
@@ -123,13 +130,13 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
         for event in events:
             event_list.append(
                 {
+                    "id": event.id,
                     "title": event.title,
                     "start": event.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
                     "end": event.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
-
                 }
             )
-        context = {"form": forms, "events": event_list,
+        context = {"form": form, "events": event_list,
                    "events_month": events_month}
         return render(request, self.template_name, context)
 

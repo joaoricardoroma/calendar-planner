@@ -1,5 +1,4 @@
-# Event Calendar in Django
-
+# Weekly Calendar
 
 ## How To Setup
 ```
